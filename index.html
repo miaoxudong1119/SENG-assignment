@@ -1,0 +1,147 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Socket.IO chat</title>
+    <style>
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      body { font: 13px Helvetica, Arial; }
+      form { margin:auto;background: #000; padding: 3px; position: fixed; bottom: 0; width: 100%; }
+      form input { margin:auto;border: 0; padding: 10px; width: 90%; margin-right: .5%; }
+      form button { width: 9%; background: rgb(130, 224, 255); border: none; padding: 10px; }
+      #messages { list-style-type: none; margin: 0; padding: 0; }
+      #messages li { padding: 5px 10px;background-color: darkgrey;}
+      /* #messages li:nth-child(odd) { background: #eee; } */
+      #messages {margin: auto; margin-bottom: 40px ; height:100px ;background-color: darkgrey;}
+      #user {position:fixed; background-color:rgb(215, 232, 240);  margin-left:60%  ;width: 20%; height: 687px; }
+      #userList li{list-style-type: none;}
+      #m{margin-left: auto;width: 100%; background-color: aqua;  }
+      #a{display: inline-block; width: 100%;background-color: aqua;} 
+      #b{
+        margin: auto; margin-top: 40px ; height:687px ;background-color: darkgrey;overflow-y: scroll;
+      }
+     /* width */
+
+    </style>
+  </head>
+  <body>
+    <div id="user"><ul  id="userList"><h5>Online Users</h5></ul></div>
+    <div id="b">
+      <ul id="messages"></ul>
+    </div>
+      
+    
+    
+    
+    
+    
+      <form action="" id="a">
+        <input id="m" autocomplete="off" /><button>Send</button>
+      </form>
+
+    
+    
+    <script src="https://cdn.socket.io/socket.io-1.2.0.js"></script>
+    <script src="https://code.jquery.com/jquery-1.11.1.js"></script>
+    <script>
+      
+      $(function () {
+        var socket = io();
+        var userName=""
+        
+        
+        if(socket!==undefined){
+          console.log("user connectted");
+          // UserName="User"+Math.floor(Math.random() * 10);
+        }
+        $('form').submit(function(){
+          socket.emit('chat message', $('#m').val());
+          $('#m').val('');
+          return false;
+        });
+        socket.on('return message', data=>{
+          
+          var message=document.createElement("li");
+          message.className="mes"
+          message.innerHTML=data.time+"    "+data.name.fontcolor(data.color)+":"+data.msg;
+          document.getElementById("messages").appendChild(message);
+          // $('#messages').append($('<li>').text(data.time+"    "+data.name+":"+data.msg));
+          var mes=document.getElementsByClassName("li");
+          if(data.name==userName){
+            message.style.fontWeight="bold"
+          }
+          
+          var element = document.getElementById("b");
+          element.scrollTop = element.scrollHeight - element.clientHeight;
+        });
+        // socket.emit('login',UserName, ()=>{
+          
+        // })
+        socket.on('disconnect',()=>{
+          console.log("quit");
+        })
+        socket.on('giveName', data=>{
+          document.cookie = data.name
+          userName=data.name;
+        })
+
+        socket.on('updateUser', users =>{
+          var userlist=document.getElementById("userList");
+          userlist.innerHTML="";
+          var header=document.createElement("h1")
+          header.innerHTML="Online User"
+          userlist.prepend(header)
+          users.forEach(user=>{
+            var auser=document.createElement('li')
+            if(user==userName){
+              // auser.style.fontWeight="bold";
+            }
+            auser.innerHTML=user;
+            userlist.append(auser);
+          })
+          
+        })
+        socket.on("changecolor",data=>{
+          console.log("here is color"+data.color)
+          var mes=document.getElementsByClassName("mes")
+          
+          for(var i=0; i<mes.length;i++){
+            if(mes[i].innerHTML.includes(data.name)){
+              console.log(mes[i].innerHTML)
+              console.log("font color="+"\""+data.origincolor+"\""+"font color="+"\""+data.color+"\"")
+              mes[i].innerHTML=mes[i].innerHTML.replace("font color="+"\""+data.origincolor+"\"","font color="+"\""+data.color+"\"")
+              
+            }
+          }
+
+        })
+        if(document.cookie!=undefined){
+          userName=document.cookie
+          socket.emit("login",document.cookie)
+        }
+        var h = window.innerHeight;
+        document.getElementById("messages").style.height="90%"
+        
+        //0.95*h+"px"
+        var width = (window.innerWidth > 0) ? window.innerWidth : screen.width;
+        if(width>960){
+          document.getElementById("messages").style.width="960px";
+          document.getElementById("b").style.width="950px";
+          document.getElementById("a").style.marginLeft=((width-960)/2+5)+"px"
+          document.getElementById("m").style.width="90%"
+          document.getElementById("a").style.width="950px"
+          document.getElementById("back").style.width="935px"
+          document.getElementById("back").style.margin="auto"
+        }
+        else{
+          
+        }
+        
+
+
+
+        
+
+      });
+    </script>
+  </body>
+</html>
